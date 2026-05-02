@@ -1,0 +1,33 @@
+la aplicacion constara de lo siguiente:
+sera una interfaz limpia con el titulo y una barra de busqueda en el centro, al exribir sobre la barra de busqueda se elevara a la parte superior de la pantalla, 
+el titulo se movera a la izquierda, y el glow seguira a la barra de busqueda, debajo de la barra iran apareciendo las tarjetas de resultado, al hacer clic en la tarjeta se mostrara
+la pagina del documento. los resultados de la api es un json con todos los resultados, cada resultado esta etiquetado con la cantidad de coincidencias, el resultado con mas coinicidencias tiene que aparecer primero, luego el que tenga menos, y asi sucesivamente.
+
+documento: la pagina es una busqueda en una base de datos que contiene informacion y metadatos sobre documentos, documentos con titulo, descripcion, autor, compania, versiones y metadatos.
+los documentos tendran diferente informacion, cada documento tendra diferentes versiones, y cada version tendra diferentes metadatos. por lo que esta vista tine que ser adaptativa para tipos de datos 
+persistentes entre cada documento y tipos de datos dinamicos debido a las diferentes versiones y metadatos que pueden variar entre cada documento.
+los detalles de informacion y metadatos tienen que ser destacados con un color verde. 
+
+
+Línea de Diseño:
+Aplicación Single Page de estética limpia, elegante y tecnológica. El estilo es minimalista monocromático (blanco sobre negro absoluto) con un enfoque en la profundidad mediante luces y sombras.
+
+Estilo Visual:
+
+Morfología: Componentes con bordes ultra-redondeados (estilo cápsula) y superficies limpias.
+
+Tipografía: Uso exclusivo de JetBrains Mono para un aspecto de ingeniería moderna.
+
+Efecto Neón: Los bordes de los componentes activos (barra y tarjetas) deben emitir una iluminación blanca intensa y sólida cuando están en foco o hover.
+
+Sistema de Iluminación Dinámica:
+
+Glow Viajero: Un resplandor radial de fondo que se desplaza con movimiento fluido y orgánico entre los componentes. No desaparece, sino que "viaja" hacia el elemento que tiene la atención del usuario (barra de búsqueda o tarjetas de resultados).
+
+Aura del Cursor: El puntero del usuario emite su propia luz tenue, actuando como una linterna que ilumina el fondo negro mientras se desplaza.
+
+Comportamiento de Interfaz:
+
+Animación de Búsqueda: La barra de búsqueda inicia en el centro y se desplaza elásticamente a la parte superior al detectar entrada de texto, desplegando los resultados debajo.
+
+Interactividad: Al hacer hover sobre los resultados, el resplandor de fondo se desliza suavemente hacia la tarjeta seleccionada, activando su brillo neón y una ligera escala de elevación.
