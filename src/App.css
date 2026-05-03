@@ -100,6 +100,29 @@
   }
 }
 
+/* Exit animations */
+.header-exit {
+  animation: headerSlideOut 0.4s var(--ease-out) forwards;
+}
+
+@keyframes headerSlideOut {
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.results-exit {
+  animation: resultsFadeOut 0.3s ease forwards;
+}
+
+@keyframes resultsFadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
 .bolt-icon {
   display: inline-block;
   vertical-align: middle;
@@ -147,6 +170,18 @@
   align-items: center;
   padding: 40px;
   gap: 48px;
+  animation: landingFadeIn 0.5s var(--ease-out);
+}
+
+@keyframes landingFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .landing .app-title {

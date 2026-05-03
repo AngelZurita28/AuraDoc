@@ -17,6 +17,7 @@ function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<DocumentResult | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // ── Refs ──
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -58,18 +59,29 @@ function App() {
     }
   }, [hasSearched, moveGlowTo]);
 
+  // Auto-focus search input on mount and after transitions
+  useEffect(() => {
+    if (!isTransitioning) {
+      searchInputRef.current?.focus();
+    }
+  }, [hasSearched, isTransitioning]);
+
   // ── Browser History ──
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
       const state = e.state as { view?: string } | null;
       if (!state || state.view === 'landing') {
-        // Back to landing
+        // Back to landing with transition
         setQuery('');
+        setIsTransitioning(true);
         setResults([]);
         setSearchTags([]);
-        setHasSearched(false);
         setError(null);
         setSelectedDoc(null);
+        setTimeout(() => {
+          setHasSearched(false);
+          setIsTransitioning(false);
+        }, 400);
       } else if (state.view === 'results') {
         // Back to results from detail
         setSelectedDoc(null);
@@ -85,7 +97,6 @@ function App() {
     if (!trimmed) {
       setResults([]);
       setSearchTags([]);
-      setHasSearched(false);
       setError(null);
       setSelectedDoc(null);
       return;
@@ -128,7 +139,6 @@ function App() {
     setQuery('');
     setResults([]);
     setSearchTags([]);
-    setHasSearched(false);
     setError(null);
     setSelectedDoc(null);
     searchInputRef.current?.focus();
@@ -140,7 +150,16 @@ function App() {
 
   const goHome = () => {
     window.history.pushState({ view: 'landing' }, '');
-    handleClear();
+    setIsTransitioning(true);
+    setQuery('');
+    setResults([]);
+    setSearchTags([]);
+    setError(null);
+    setSelectedDoc(null);
+    setTimeout(() => {
+      setHasSearched(false);
+      setIsTransitioning(false);
+    }, 400);
   };
 
   // ── Match level helper ──
@@ -204,7 +223,7 @@ function App() {
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => moveGlowTo(searchInputRef.current)}
-          autoComplete="off"
+          autoFocus
           spellCheck={false}
         />
         {isSearching && <div className="search-spinner" />}
@@ -521,7 +540,7 @@ function App() {
         {/* ── SEARCH ACTIVE STATE ── */}
         {hasSearched && (
           <>
-            <header className="header">
+            <header className={`header ${isTransitioning ? 'header-exit' : ''}`}>
               <span className="app-title" onClick={goHome} role="button" tabIndex={0}>
                 <svg className="bolt-icon bolt-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
@@ -535,7 +554,7 @@ function App() {
             {selectedDoc ? (
               renderDocumentDetail(selectedDoc)
             ) : (
-              <div className="results-area">
+              <div className={`results-area ${isTransitioning ? 'results-exit' : ''}`}>
                 {/* Results meta */}
                 {results.length > 0 && (
                   <div className="results-meta">
