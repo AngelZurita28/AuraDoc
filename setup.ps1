@@ -19,11 +19,11 @@ try {
 # 2. Pedir URLs de las APIs
 Write-Host "`nConfiguracion de APIs:" -ForegroundColor Green
 
-$apiDotnetUrl = Read-Host "Ingresa la URL de la API .NET (Enter para 'http://localhost:5000')"
-if ([string]::IsNullOrWhiteSpace($apiDotnetUrl)) { $apiDotnetUrl = "http://localhost:5000" }
+$apiDotnetUrl = Read-Host "Ingresa la URL de la API .NET (Enter para 'http://127.0.0.1:5000')"
+if ([string]::IsNullOrWhiteSpace($apiDotnetUrl)) { $apiDotnetUrl = "http://127.0.0.1:5000" }
 
-$apiBackendUrl = Read-Host "Ingresa la URL de la API Node.js (Enter para 'http://localhost:3000')"
-if ([string]::IsNullOrWhiteSpace($apiBackendUrl)) { $apiBackendUrl = "http://localhost:3000" }
+$apiBackendUrl = Read-Host "Ingresa la URL de la API Node.js (Enter para 'http://127.0.0.1:3000')"
+if ([string]::IsNullOrWhiteSpace($apiBackendUrl)) { $apiBackendUrl = "http://127.0.0.1:3000" }
 
 # 3. Guardar en .env
 Write-Host "`nGenerando archivo .env..."
