@@ -34,11 +34,11 @@ fi
 # 2. Pedir URLs de las APIs
 echo -e "\n${GREEN}Configuracion de APIs:${NC}"
 
-read -p "Ingresa la URL de la API .NET (Enter para 'http://localhost:5000'): " apiDotnetUrl
-if [ -z "$apiDotnetUrl" ]; then apiDotnetUrl="http://localhost:5000"; fi
+read -p "Ingresa la URL de la API .NET (Enter para 'http://127.0.0.1:5000'): " apiDotnetUrl
+if [ -z "$apiDotnetUrl" ]; then apiDotnetUrl="http://127.0.0.1:5000"; fi
 
-read -p "Ingresa la URL de la API Node.js (Enter para 'http://localhost:3000'): " apiBackendUrl
-if [ -z "$apiBackendUrl" ]; then apiBackendUrl="http://localhost:3000"; fi
+read -p "Ingresa la URL de la API Node.js (Enter para 'http://127.0.0.1:3000'): " apiBackendUrl
+if [ -z "$apiBackendUrl" ]; then apiBackendUrl="http://127.0.0.1:3000"; fi
 
 # 3. Guardar en .env
 echo -e "\nGenerando archivo .env..."
