@@ -5,6 +5,7 @@ export interface SearchResponse {
   data: DocumentResult[];
   searchTags: string[];
   message?: string;
+  searchMode?: string;
 }
 
 export interface DocumentResult {
@@ -23,6 +24,7 @@ export interface DocumentResult {
   syncedAt: string;
   metadata: DocumentMetadata;
   _matchCount: number;
+  _matchedFields?: string[];
 }
 
 export interface DocumentMetadata {
@@ -81,5 +83,13 @@ export interface UserSession {
   empresa: string;
   rol: string;
   departamento: string;
+}
+
+// ── Document Detail Types ──
+
+export interface DocumentDetailResponse {
+  status: 'success' | 'error';
+  data: DocumentResult;
+  message?: string;
 }
 

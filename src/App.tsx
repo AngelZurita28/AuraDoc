@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
-import { searchDocuments, loginUser } from './api';
+import { searchDocuments, loginUser, fetchDocumentDetail } from './api';
 import type { DocumentResult, SearchResponse, UserSession } from './types';
 import type {
   DocumentSpecific,
@@ -28,6 +28,11 @@ function App() {
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  // ── Search & Detail Options State ──
+  const [deepSearch, setDeepSearch] = useState(false);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   // ── Refs ──
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -105,6 +110,8 @@ function App() {
         setSearchTags([]);
         setError(null);
         setSelectedDoc(null);
+        setDetailError(null);
+        setIsDetailLoading(false);
         setTimeout(() => {
           setHasSearched(false);
           setIsTransitioning(false);
@@ -112,6 +119,8 @@ function App() {
       } else if (state.view === 'results') {
         // Back to results from detail
         setSelectedDoc(null);
+        setDetailError(null);
+        setIsDetailLoading(false);
       }
     };
     window.addEventListener('popstate', handlePopState);
@@ -119,7 +128,7 @@ function App() {
   }, []);
 
   // ── Search with debounce ──
-  const performSearch = useCallback(async (q: string) => {
+  const performSearch = useCallback(async (q: string, isDeep = deepSearch) => {
     const trimmed = q.trim();
     if (!trimmed) {
       setResults([]);
@@ -138,7 +147,7 @@ function App() {
     setSelectedDoc(null);
 
     try {
-      const res: SearchResponse = await searchDocuments(trimmed);
+      const res: SearchResponse = await searchDocuments(trimmed, isDeep);
       // Sort by _matchCount desc
       const sorted = [...(res.data || [])].sort(
         (a, b) => b._matchCount - a._matchCount
@@ -152,14 +161,14 @@ function App() {
     } finally {
       setIsSearching(false);
     }
-  }, []);
+  }, [hasSearched, deepSearch]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => performSearch(value), 400);
+    debounceRef.current = setTimeout(() => performSearch(value, deepSearch), 400);
   };
 
   const handleClear = () => {
@@ -223,6 +232,30 @@ function App() {
     setError(null);
     setSelectedDoc(null);
     setHasSearched(false);
+  };
+
+  // ── Search & Detail Handlers ──
+  const handleDeepSearchToggle = (checked: boolean) => {
+    setDeepSearch(checked);
+    if (query.trim()) {
+      performSearch(query, checked);
+    }
+  };
+
+  const handleSelectDocument = async (id: string) => {
+    window.history.pushState({ view: 'detail' }, '');
+    setIsDetailLoading(true);
+    setDetailError(null);
+    setSelectedDoc(null);
+    try {
+      const res = await fetchDocumentDetail(id);
+      setSelectedDoc(res.data);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al obtener el detalle del documento';
+      setDetailError(msg);
+    } finally {
+      setIsDetailLoading(false);
+    }
   };
 
   // ── Match level helper ──
@@ -295,6 +328,18 @@ function App() {
             ✕
           </button>
         )}
+      </div>
+
+      <div className="search-options">
+        <label className="deepsearch-toggle" onMouseEnter={(e) => moveGlowTo(e.currentTarget)}>
+          <input
+            type="checkbox"
+            checked={deepSearch}
+            onChange={(e) => handleDeepSearchToggle(e.target.checked)}
+          />
+          <span className="toggle-slider"></span>
+          <span className="toggle-label">Búsqueda Profunda (DeepSearch)</span>
+        </label>
       </div>
     </div>
   );
@@ -730,7 +775,19 @@ function App() {
             </header>
 
             {/* Detail or Results */}
-            {selectedDoc ? (
+            {isDetailLoading ? (
+              <div className="detail-loading-container">
+                <div className="search-spinner detail-spinner" />
+                <p>Cargando información completa del documento...</p>
+              </div>
+            ) : detailError ? (
+              <div className="detail-view">
+                <button className="detail-back" onClick={() => { setSelectedDoc(null); setDetailError(null); }}>
+                  ← Volver a resultados
+                </button>
+                <div className="search-error">{detailError}</div>
+              </div>
+            ) : selectedDoc ? (
               renderDocumentDetail(selectedDoc)
             ) : (
               <div className={`results-area ${isTransitioning ? 'results-exit' : ''}`}>
@@ -773,17 +830,13 @@ function App() {
                         <div
                           key={doc.id}
                           className="result-card"
-                          onClick={() => {
-                            window.history.pushState({ view: 'detail' }, '');
-                            setSelectedDoc(doc);
-                          }}
+                          onClick={() => handleSelectDocument(doc.id)}
                           onMouseEnter={(e) => moveGlowTo(e.currentTarget)}
                           role="button"
                           tabIndex={0}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                              window.history.pushState({ view: 'detail' }, '');
-                              setSelectedDoc(doc);
+                              handleSelectDocument(doc.id);
                             }
                           }}
                         >
@@ -798,6 +851,16 @@ function App() {
                           </div>
                           {doc.description && (
                             <p className="result-card-desc">{doc.description}</p>
+                          )}
+                          {doc._matchedFields && doc._matchedFields.length > 0 && (
+                            <div className="matched-fields">
+                              <span className="matched-fields-label">Coincidencias:</span>
+                              <div className="matched-fields-tags">
+                                {doc._matchedFields.map((field, i) => (
+                                  <span key={i} className="matched-field-tag">{field}</span>
+                                ))}
+                              </div>
+                            </div>
                           )}
                           <div className="result-card-footer">
                             {meta?.extension && (
