@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+pnpm-lock.yaml
+bun.lock
+.agents
+.gemini
+.env
+.env.*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -66,3 +66,20 @@ export interface CadSpecific {
   softwareVersion?: string | null;
   layers?: string[];
 }
+
+// ── Auth Types ──
+
+export interface LoginCredentials {
+  Email: string;
+  Password: string;
+}
+
+export interface UserSession {
+  id: number;
+  nombre: string;
+  usuario: string;
+  empresa: string;
+  rol: string;
+  departamento: string;
+}
+

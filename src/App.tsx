@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
-import { searchDocuments } from './api';
-import type { DocumentResult, SearchResponse } from './types';
+import { searchDocuments, loginUser } from './api';
+import type { DocumentResult, SearchResponse, UserSession } from './types';
 import type {
   DocumentSpecific,
   ImageSpecific,
@@ -19,11 +19,23 @@ function App() {
   const [selectedDoc, setSelectedDoc] = useState<DocumentResult | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // ── Auth State ──
+  const [userSession, setUserSession] = useState<UserSession | null>(() => {
+    const saved = localStorage.getItem('auradoc_session');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
   // ── Refs ──
   const cursorRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Cursor Aura ──
@@ -53,18 +65,33 @@ function App() {
 
   // Focus glow on search input when in landing
   useEffect(() => {
-    if (!hasSearched && searchInputRef.current) {
+    if (userSession && !hasSearched && searchInputRef.current) {
       const timer = setTimeout(() => moveGlowTo(searchInputRef.current), 300);
       return () => clearTimeout(timer);
     }
-  }, [hasSearched, moveGlowTo]);
+  }, [hasSearched, moveGlowTo, userSession]);
 
   // Auto-focus search input on mount and after transitions
   useEffect(() => {
-    if (!isTransitioning) {
+    if (userSession && !isTransitioning) {
       searchInputRef.current?.focus();
     }
-  }, [hasSearched, isTransitioning]);
+  }, [hasSearched, isTransitioning, userSession]);
+
+  // Focus glow on email input when in login
+  useEffect(() => {
+    if (!userSession && emailInputRef.current) {
+      const timer = setTimeout(() => moveGlowTo(emailInputRef.current), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [userSession, moveGlowTo]);
+
+  // Auto-focus email input on mount if not logged in
+  useEffect(() => {
+    if (!userSession) {
+      emailInputRef.current?.focus();
+    }
+  }, [userSession]);
 
   // ── Browser History ──
   useEffect(() => {
@@ -160,6 +187,42 @@ function App() {
       setHasSearched(false);
       setIsTransitioning(false);
     }, 400);
+  };
+
+  // ── Auth Handlers ──
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password;
+    if (!trimmedEmail || !trimmedPassword) {
+      setLoginError('El correo y la contraseña son requeridos.');
+      return;
+    }
+    setIsLoggingIn(true);
+    setLoginError(null);
+    try {
+      const session = await loginUser({ Email: trimmedEmail, Password: trimmedPassword });
+      localStorage.setItem('auradoc_session', JSON.stringify(session));
+      setUserSession(session);
+      setEmail('');
+      setPassword('');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      setLoginError(msg);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('auradoc_session');
+    setUserSession(null);
+    setQuery('');
+    setResults([]);
+    setSearchTags([]);
+    setError(null);
+    setSelectedDoc(null);
+    setHasSearched(false);
   };
 
   // ── Match level helper ──
@@ -515,6 +578,101 @@ function App() {
   // ═══════════════════════════════════════════
   // RENDER
   // ═══════════════════════════════════════════
+  // ── User profile badge component ──
+  const UserProfileBadge = (
+    <div className="user-profile-badge" onMouseEnter={(e) => moveGlowTo(e.currentTarget)}>
+      <div className="user-info">
+        <span className="user-name">{userSession?.nombre}</span>
+        <span className="user-role-dept">{userSession?.rol} · {userSession?.departamento}</span>
+      </div>
+      <button className="logout-btn" onClick={handleLogout} aria-label="Cerrar sesión" title="Cerrar sesión">
+        <svg className="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      </button>
+    </div>
+  );
+
+  // ═══════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════
+  if (!userSession) {
+    return (
+      <>
+        {/* Cursor aura */}
+        <div ref={cursorRef} className="cursor-aura" />
+        <div ref={cursorDotRef} className="cursor-dot" />
+        {/* Traveling glow */}
+        <div ref={glowRef} className="traveling-glow" style={{ opacity: 0 }} />
+
+        <div className="app-container login-page-container">
+          <div className="login-card" onMouseEnter={(e) => moveGlowTo(e.currentTarget)}>
+            <div className="login-header">
+              <h1 className="app-title login-logo">
+                <svg className="bolt-icon bolt-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+                AuraDoc
+              </h1>
+              <p className="login-subtitle">Gestión de Calidad y Documentación</p>
+            </div>
+
+            <form onSubmit={handleLogin} className="login-form">
+              <div className="form-group">
+                <label htmlFor="email">Correo Electrónico</label>
+                <input
+                  ref={emailInputRef}
+                  id="email"
+                  type="email"
+                  className="login-input"
+                  placeholder="operador@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => moveGlowTo(emailInputRef.current)}
+                  disabled={isLoggingIn}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Contraseña</label>
+                <input
+                  ref={passwordInputRef}
+                  id="password"
+                  type="password"
+                  className="login-input"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => moveGlowTo(passwordInputRef.current)}
+                  disabled={isLoggingIn}
+                  required
+                />
+              </div>
+
+              {loginError && (
+                <div className="login-error-message">
+                  {loginError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="login-submit-btn"
+                disabled={isLoggingIn}
+                onMouseEnter={(e) => moveGlowTo(e.currentTarget)}
+              >
+                {isLoggingIn ? 'Iniciando sesión...' : 'Ingresar'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       {/* Cursor aura */}
@@ -527,6 +685,9 @@ function App() {
         {/* ── LANDING STATE ── */}
         {!hasSearched && (
           <div className="landing">
+            <div className="landing-top-nav">
+              {UserProfileBadge}
+            </div>
             <h1 className="app-title">
               <svg className="bolt-icon bolt-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
@@ -548,6 +709,7 @@ function App() {
                 AuraDoc
               </span>
               {SearchBar}
+              {UserProfileBadge}
             </header>
 
             {/* Detail or Results */}
