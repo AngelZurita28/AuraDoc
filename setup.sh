@@ -42,6 +42,10 @@ if [ -z "$apiBackendUrl" ]; then apiBackendUrl="http://localhost:3000"; fi
 
 # 3. Guardar en .env
 echo -e "\nGenerando archivo .env..."
+# Reemplazar localhost por host.docker.internal para que funcione dentro del contenedor
+apiDotnetUrl=$(echo $apiDotnetUrl | sed 's/localhost/host.docker.internal/g')
+apiBackendUrl=$(echo $apiBackendUrl | sed 's/localhost/host.docker.internal/g')
+
 cat <<EOF > .env
 API_DOTNET_URL=$apiDotnetUrl
 API_BACKEND_URL=$apiBackendUrl

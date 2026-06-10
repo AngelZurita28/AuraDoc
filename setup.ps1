@@ -27,6 +27,10 @@ if ([string]::IsNullOrWhiteSpace($apiBackendUrl)) { $apiBackendUrl = "http://loc
 
 # 3. Guardar en .env
 Write-Host "`nGenerando archivo .env..."
+# Reemplazar localhost por host.docker.internal para que funcione dentro del contenedor
+$apiDotnetUrl = $apiDotnetUrl -replace "localhost", "host.docker.internal"
+$apiBackendUrl = $apiBackendUrl -replace "localhost", "host.docker.internal"
+
 Set-Content -Path ".env" -Value "API_DOTNET_URL=$apiDotnetUrl" -Encoding ascii
 Add-Content -Path ".env" -Value "API_BACKEND_URL=$apiBackendUrl" -Encoding ascii
 
