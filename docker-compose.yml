@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  auradoc_frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: auradoc_frontend
+    # Modo host: la app se conecta a las APIs via localhost
+    # y es accesible desde fuera por la IP de la maquina
+    network_mode: host
+    environment:
+      - API_DOTNET_URL=${API_DOTNET_URL:-http://localhost:5000}
+      - API_BACKEND_URL=${API_BACKEND_URL:-http://localhost:3000}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+    # Instalamos dependencias y corremos vite exponiendo al host
+    command: bash -c "pnpm install && pnpm run dev --host 0.0.0.0"

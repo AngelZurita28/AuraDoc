@@ -1,7 +1,7 @@
 import type { SearchResponse, LoginCredentials, UserSession } from './types';
 
-const API_BASE = import.meta.env.DEV ? '' : (import.meta.env.API_BACKEND_URL || 'http://localhost:3000');
-const API_DOTNET_BASE = import.meta.env.DEV ? '' : (import.meta.env.API_DOTNET_URL || 'http://localhost:5000');
+const API_BASE = import.meta.env.DEV ? '' : (import.meta.env.API_BACKEND_URL || 'http://127.0.0.1:3000');
+const API_DOTNET_BASE = import.meta.env.DEV ? '' : (import.meta.env.API_DOTNET_URL || 'http://127.0.0.1:5000');
 
 export async function searchDocuments(query: string): Promise<SearchResponse> {
   const url = `${API_BASE}/api/documents/search?q=${encodeURIComponent(query)}`;

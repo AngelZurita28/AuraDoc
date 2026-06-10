@@ -1,0 +1,10 @@
+FROM node:20-slim
+
+# Instala pnpm globalmente
+RUN npm install -g pnpm
+
+# Configurar el directorio de trabajo
+WORKDIR /app
+
+# Exponer el puerto por defecto de Vite
+EXPOSE 5173

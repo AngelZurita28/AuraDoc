@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# AuraDoc
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este es el frontend principal de la aplicación, construido con React y Vite.
 
-Currently, two official plugins are available:
+## Instalación y Configuración
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+El proyecto utiliza Docker para facilitar el despliegue del entorno de desarrollo y la conexión transparente con el resto de los microservicios.
 
-## React Compiler
+### Prerrequisitos
+*   **Docker** y **Docker Compose** instalados.
+*   **Git** para clonar el repositorio.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Pasos Rápidos
 
-## Expanding the ESLint configuration
+#### En Windows (PowerShell):
+1.  Abre una terminal en la raíz de este proyecto.
+2.  Ejecuta el script de configuración:
+    ```powershell
+    .\setup.ps1
+    ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+#### En Linux (Bash):
+1.  Abre una terminal en la raíz de este proyecto.
+2.  Dale permisos y ejecuta el script:
+    ```bash
+    chmod +x setup.sh
+    ./setup.sh
+    ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### ¿Qué hace el script?
+1.  Crea un archivo `.env` configurando las URLs de las APIs (.NET en el puerto 5000 y Node.js en el 3000).
+2.  Levanta un contenedor de **Node.js** con `pnpm` instalado.
+3.  Utiliza `network_mode: host` para que la aplicación frontend en Vite pueda conectarse directamente a `localhost` y comunicarse con las APIs sin problemas de enrutamiento de red.
+4.  Instala las dependencias de Node.js e inicia el servidor de Vite exponiendo el puerto al host.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Uso Diario
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Una vez que hayas ejecutado el script de instalación (`setup`) por primera vez, **no necesitas volver a ejecutarlo**.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Para tu trabajo del día a día, utiliza los comandos estándar de Docker:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+*   **Para Encender la App:**
+    ```bash
+    docker compose up -d
+    ```
+*   **Para Apagar la App:**
+    ```bash
+    docker compose down
+    ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+La aplicación estará disponible en [http://localhost:5173](http://localhost:5173).

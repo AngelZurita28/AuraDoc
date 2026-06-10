@@ -332,6 +332,23 @@ function App() {
         </div>
 
         <div className="detail-sections">
+          {/* ── Raw JSON Section ── */}
+          <div className="detail-section" style={{ padding: 20 }}>
+            <h2 className="detail-section-title" style={{ padding: '0 0 10px 0' }}>JSON Crudo del Documento</h2>
+            <pre style={{ 
+              background: 'rgba(255,255,255,0.02)', 
+              padding: 15, 
+              borderRadius: 8, 
+              overflow: 'auto', 
+              fontSize: 12, 
+              color: 'var(--accent-green)',
+              border: '1px solid var(--border)',
+              maxHeight: 400
+            }}>
+              {JSON.stringify(doc, null, 2)}
+            </pre>
+          </div>
+
           {/* ── General Info ── */}
           <div className="detail-section">
             <h2 className="detail-section-title">Información General</h2>
