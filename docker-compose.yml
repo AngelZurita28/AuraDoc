@@ -18,4 +18,4 @@ services:
       - /app/node_modules
     working_dir: /app
     # Instalamos dependencias y corremos vite exponiendo al host
-    command: bash -c "pnpm install && pnpm run dev --host 0.0.0.0"
+    command: bash -c "pnpm install --config.minimum-release-age=0 && pnpm run dev --host 0.0.0.0"

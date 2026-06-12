@@ -354,9 +354,33 @@ function App() {
 
     return (
       <div className="detail-view">
-        <button className="detail-back" onClick={() => window.history.back()}>
-          ← Volver a resultados
-        </button>
+        <div className="detail-actions">
+          <button className="detail-back" onClick={() => window.history.back()}>
+            ← Volver a resultados
+          </button>
+          <a
+            href={`http://localhost:8080/index.php?action=view&id=${doc.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="view-doc-btn"
+            onMouseEnter={(e) => moveGlowTo(e.currentTarget)}
+          >
+            <span>Ir al visualizador de documentos</span>
+            <svg
+              className="view-doc-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+          </a>
+        </div>
 
         <div className="detail-header">
           <h1 className="detail-title">{doc.title}</h1>
