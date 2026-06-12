@@ -8,11 +8,8 @@ services:
     container_name: auradoc_frontend
     ports:
       - "5173:5173"
-<<<<<<< HEAD
     extra_hosts:
       - "host.docker.internal:host-gateway"
-=======
->>>>>>> 97e8e4d92a23b2840c44eca1eb61022e0ab0f84b
     environment:
       - API_DOTNET_URL=${API_DOTNET_URL:-http://localhost:5000}
       - API_BACKEND_URL=${API_BACKEND_URL:-http://localhost:3000}
